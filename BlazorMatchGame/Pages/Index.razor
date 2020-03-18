@@ -1,50 +1,32 @@
 ﻿@page "/"
 
 <style>
-    .container { width: 400px; }
-    button { width: 100px; height: 100px; font-size: 50px; }
+    .container {
+        width: 400px;
+    }
+
+    button {
+        width: 100px;
+        height: 100px;
+        font-size: 50px;
+    }
 </style>
 
 <div class="container">
     <div class="row">
-        <div class="col-sm">
-            <button @onclick="ButtonClick" type="button" class="btn btn-outline-dark">@randomizedAnimals[0, 0]</button>
-        </div>
-        <div class="col-sm">
-            <button @onclick="ButtonClick"  type="button" class="btn btn-outline-dark">@randomizedAnimals[0, 1]</button>
-        </div>
-        <div class="col-sm">
-            <button @onclick="ButtonClick"  type="button" class="btn btn-outline-dark">@randomizedAnimals[0, 2]</button>
-        </div>
+        @foreach (var animal in shuffledAnimals)
+        {
+            <div class="col-md-3">
+                <button @onclick="@(() => ButtonClick(animal))" type="button" class="btn btn-outline-dark">@animal</button>
+            </div>
+        }
     </div>
-    <div class="row">
-        <div class="col-sm">
-            <button @onclick="ButtonClick"  type="button" class="btn btn-outline-dark">@randomizedAnimals[1, 0]</button>
-        </div>
-        <div class="col-sm">
-            <button @onclick="ButtonClick"  type="button" class="btn btn-outline-dark">@randomizedAnimals[1, 1]</button>
-        </div>
-        <div class="col-sm">
-            <button @onclick="ButtonClick"  type="button" class="btn btn-outline-dark">@randomizedAnimals[1, 2]</button>
-
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm">
-            <button @onclick="ButtonClick"  type="button" class="btn btn-outline-dark">@randomizedAnimals[2, 0]</button>
-        </div>
-        <div class="col-sm">
-            <button @onclick="ButtonClick"  type="button" class="btn btn-outline-dark">@randomizedAnimals[2, 1]</button>
-        </div>
-        <div class="col-sm">
-            <button @onclick="ButtonClick"  type="button" class="btn btn-outline-dark">@randomizedAnimals[2, 2]</button>
-        </div>
-    </div>
+    <p>Matches found: @matchesFound</p>
 </div>
 
 @code {
     List<string> animalEmoji = new List<string>()
-            {
+        {
                "🐶","🐶",
                "🐺","🐺",
                "🐮","🐮",
@@ -55,8 +37,9 @@
                "🐹","🐹",
             };
 
-    [Parameter]
-    public string[,] randomizedAnimals { get; set; } = new string[3, 3];
+    List<string> shuffledAnimals = default;
+    string lastAnimalFound = string.Empty;
+    int matchesFound = 0;
 
     protected override void OnInitialized()
     {
@@ -66,19 +49,34 @@
     private void SetUpGame()
     {
         Random random = new Random();
+        shuffledAnimals = animalEmoji
+            .OrderBy(item => random.Next())
+            .ToList();
 
-        for (int row = 0; row < 3; row++)
-        {
-            for (int col = 0; col < 3; col++)
-            {
-                int index = random.Next(animalEmoji.Count);
-
-                randomizedAnimals[row, col] = animalEmoji[index];
-            }
-        }
+        matchesFound = 0;
     }
 
-    private void ButtonClick()
-    { 
+    private void ButtonClick(string animal)
+    {
+        if (lastAnimalFound == string.Empty)
+        {
+            lastAnimalFound = animal;
+            return;
+        }
+        else if (lastAnimalFound == animal)
+        {
+            lastAnimalFound = string.Empty;
+
+            //Replace found animals with empty string to hide them
+            shuffledAnimals = shuffledAnimals
+                .Select(a => a.Replace(animal, string.Empty))
+                .ToList();
+
+            matchesFound++;
+            if (matchesFound == 8)
+            {
+                SetUpGame();
+            }
+        }
     }
 }
