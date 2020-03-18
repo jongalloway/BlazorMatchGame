@@ -60,11 +60,13 @@
     {
         if (lastAnimalFound == string.Empty)
         {
+            //First selection of the pair. Remember it.
             lastAnimalFound = animal;
             return;
         }
         else if (lastAnimalFound == animal)
         {
+            //Match found! Reset for next pair.
             lastAnimalFound = string.Empty;
 
             //Replace found animals with empty string to hide them
@@ -77,6 +79,12 @@
             {
                 SetUpGame();
             }
+        }
+        else
+        {
+            //User selected a pair that don't match.
+            //Reset selection.
+            lastAnimalFound = string.Empty;
         }
     }
 }
